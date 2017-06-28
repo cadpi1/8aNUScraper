@@ -35,9 +35,12 @@ class EightANuScraper:
             sport_climbers_profiles_urls.extend(sport_urls)
 
             pages_scraped = pages_scraped+1
-            time.sleep(2)
+            time.sleep(1)
 
-        sport_climbing_profiles = self.ExtractDataFromUrls(sport_climbers_profiles_urls)
+        try:
+            sport_climbing_profiles = self.ExtractDataFromUrls(sport_climbers_profiles_urls)
+        except:
+            print("an error occured erxtracting the profiles. saving what was extracted")
 
         self.SaveDataAsCSV(sport_climbing_profiles, "sport_climbers.csv")
 
@@ -57,9 +60,12 @@ class EightANuScraper:
             bouldering_profiles_urls.extend(boudlering_urls)
 
             pages_scraped = pages_scraped+1
-            time.sleep(2)
-
-        bouldering_profiles = self.ExtractDataFromUrls(bouldering_profiles_urls)
+            time.sleep(1)
+        
+        try:
+            bouldering_profiles = self.ExtractDataFromUrls(bouldering_profiles_urls)
+        except:
+            print("an error occured erxtracting the profiles. saving what was extracted")
 
         self.SaveDataAsCSV(bouldering_profiles, "boulderers.csv")
 
@@ -83,7 +89,7 @@ class EightANuScraper:
 
     def GetAllLinksInSection(self, soup, section_id):
         section = soup.find(id = section_id)
-        links = soup.find_all("a")
+        links = section.find_all("a")
         profile_ids = self.FilterProfileLinks(links)
         return profile_ids
 
@@ -102,8 +108,12 @@ class EightANuScraper:
         print("Preparing to fetch links : number of links "+str(len(links)))
         cookie_name, session_id = self.GetSession()
         for link in links:
-            data.append(self.ExtractDataFromUrl(link))
-      
+            try:
+                data.append(self.ExtractDataFromUrl(link))
+            except:
+                #whatever could go wrong reading the data, skip that element 
+                pass 
+
         time.sleep(1)
         return data
 
@@ -148,8 +158,12 @@ class EightANuScraper:
             writer = csv.writer(csvfile, delimiter=";")
             writer.writerow(['Name', 'Date of Birth', 'Height', 'Weight', 'Started Climbing', 'Occupation', 'Interests', 'Best Result', 'Climbing Area', 'Sponsors'])  
             for line in data:
-                writer.writerow(line)
-
+                try:
+                    writer.writerow(line)
+                except:
+                    #Dodgy endoging causes errors writing lines 
+                    pass
+            
     def FindAndClickNextSportButton(self):
         self.driver.find_element_by_link_text("Next 100").click()
 
